@@ -4,10 +4,11 @@ export default defineNuxtConfig({
   extends: ['./auth'],
   devtools: { enabled: true },
 
+  // modules: ['@hebilicious/authjs-nuxt']
   nitro: {
     entry: dev ? './preset/entry.dev.ts' : undefined,
     preset: './server/preset',
   },
 
-  // modules: ['@hebilicious/authjs-nuxt']
+  modules: ['@nuxt/ui']
 })
