@@ -6,16 +6,17 @@ export interface User {
   name: string
   email: string
   password: string
+  image: string
 }
 
 export async function findUserByEmail(email: string) {
-  const storage = useStorage()
+  const storage = useStorage('db')
   const key = getUserKey(email!)
   return await storage.getItem<User>(key)
 }
 
 export async function createUser(user: Partial<User>) {
-  const storage = useStorage()
+  const storage = useStorage('db')
   const key = getUserKey(user.email!)
   if (await storage.hasItem(key))
     throw createError({ message: 'Email already exists!', statusCode: 409 })
@@ -28,7 +29,7 @@ export async function createUser(user: Partial<User>) {
 }
 
 export async function updateUserByEmail(email: string, updates: Partial<User>) {
-  const storage = useStorage()
+  const storage = useStorage('db')
   const user = await findUserByEmail(email)
   if (!user)
     throw createError('unable to find user')

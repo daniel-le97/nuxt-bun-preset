@@ -38,8 +38,11 @@ const websocket: WebSocketHandler = {
     
     const msg = JSON.parse(message as string) as { type: string, data: any }
     if (msg.type === 'auth') {
+      console.log('auth', message);
+      
       ws.data.auth = msg.data
       ws.subscribe(msg.data.id)
+      ws.data.channels.push(msg.data.id)
     }
     else if (msg.type === 'subscribe') {
       ws.subscribe(msg.data)

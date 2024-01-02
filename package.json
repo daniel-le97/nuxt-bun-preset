@@ -17,6 +17,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.1",
     "@hebilicious/authjs-nuxt": "latest",
+    "@nuxt/devtools": "^1.0.6",
     "@nuxt/ui": "latest",
     "eslint": "^8.56.0",
     "nuxt": "npm:nuxt-nightly@latest",

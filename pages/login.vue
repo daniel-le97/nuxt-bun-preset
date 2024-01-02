@@ -15,16 +15,31 @@ const tabs = [
 ]
 
 const loginForm = ref({
-  email: 'arash@gmail.com',
+  email: 'test@gmail.com',
   password: 'password',
 })
 const registerForm = ref({
-  email: 'arash@gmail.com',
+  email: 'test@gmail.com',
   password: 'password',
 })
 const hidden = ref(true)
 
 const toast = useToast()
+
+
+
+async function authEvent(type: 'login' | 'register') {
+  try {
+    const event = type === 'register' ? authRegister : authLogin
+    const data = type === 'login' ? {email: loginForm.value.email, password: loginForm.value.password} : {email: registerForm.value.email, password: registerForm.value.password}
+    await event(data.email, data.password)
+    const ws = useNuxtApp().$ws
+    const auth = useAuth()
+    ws.send(JSON.stringify({type: 'auth', data: auth.session.value}))
+  } catch (error) {
+    onError(error)
+  }
+}
 
 function onError(err: any) {
   toast.add({
@@ -39,7 +54,7 @@ function onError(err: any) {
   <UContainer :ui="{ constrained: 'max-w-xl' }">
     <UTabs class="p-4" :items="tabs">
       <template #login="{ item }">
-        <UForm :state="loginForm" @submit="authLogin(loginForm.email, loginForm.password).catch(onError)">
+        <UForm :state="loginForm" @submit="authEvent('login')">
           <UCard>
             <template #header>
               <div class="flex">
@@ -86,7 +101,7 @@ function onError(err: any) {
         </UForm>
       </template>
       <template #register="{ item }">
-        <UForm :state="registerForm" @submit="authRegister(registerForm.email, registerForm.password).catch(onError)">
+        <UForm :state="registerForm" @submit="authEvent('register')">
           <UCard>
             <template #header>
               <div class="flex">
