@@ -7,6 +7,7 @@ export interface AuthSession {
   id: string
   name: string
   email: string
+  image: string
 }
 
 export async function useAuthSession(event: H3Event) {

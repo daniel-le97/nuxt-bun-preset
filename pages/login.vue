@@ -26,17 +26,16 @@ const hidden = ref(true)
 
 const toast = useToast()
 
-
-
 async function authEvent(type: 'login' | 'register') {
   try {
     const event = type === 'register' ? authRegister : authLogin
-    const data = type === 'login' ? {email: loginForm.value.email, password: loginForm.value.password} : {email: registerForm.value.email, password: registerForm.value.password}
+    const data = type === 'login' ? { email: loginForm.value.email, password: loginForm.value.password } : { email: registerForm.value.email, password: registerForm.value.password }
     await event(data.email, data.password)
     const ws = useNuxtApp().$ws
     const auth = useAuth()
-    ws.send(JSON.stringify({type: 'auth', data: auth.session.value}))
-  } catch (error) {
+    ws.send(JSON.stringify({ type: 'auth', data: auth.session.value }))
+  }
+  catch (error) {
     onError(error)
   }
 }

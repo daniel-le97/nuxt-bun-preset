@@ -35,6 +35,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   const currentRoute = useRoute()
 
+  // @ts-expect-error it is there
   if (process.client) {
     watch(loggedIn, async (loggedIn) => {
       if (!loggedIn) {

@@ -1,4 +1,4 @@
-import { randomUUID } from 'uncrypto'
+import { randomUUID } from 'node:crypto'
 
 export interface User {
   id: string

@@ -10,5 +10,5 @@ export default defineNuxtConfig({
     preset: './server/preset',
   },
 
-  modules: ['@nuxt/ui']
+  modules: ['@nuxt/ui', '@vueuse/nuxt'],
 })

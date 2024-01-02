@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "bun --bun nuxt dev",
+    "dev": "bun --bun nuxt dev --watch",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -19,6 +19,7 @@
     "@hebilicious/authjs-nuxt": "latest",
     "@nuxt/devtools": "^1.0.6",
     "@nuxt/ui": "latest",
+    "@vueuse/nuxt": "latest",
     "eslint": "^8.56.0",
     "nuxt": "npm:nuxt-nightly@latest",
     "vue": "^3.4.3",

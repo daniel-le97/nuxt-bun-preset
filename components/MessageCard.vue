@@ -1,32 +1,49 @@
-<template>
-  <div  class="flex  " :class="  user.name === session.name  ? 'justify-start' : ' justify-end'">
-   <div class="space-y-1 flex flex-col items-center">
-      <div class="text-gray-500 text-xs">
-        created: jan 1, 2021
-       </div>
-      <div class=" p-2 rounded-lg relative" :class="user.name === session.name ? 'bg-emerald-400' : 'bg-gray-100'">
-    
-        <p class="text-black">{{ body }}</p>
+<script setup>
+// Props
+const props = defineProps([ 'userId', 'userAvatar', 'message', 'createdAt'])
+const id = useAuth().session?.id
+const timeAgo = useTimeAgo(props.createdAt)
+</script>
 
-   
-  
-      </div>
-   </div>
+<template>
+  <div class="message-card" :class="[{ 'own-message': userId === id }]">
+    <img :src="userAvatar" alt="User Avatar" class="user-avatar">
+    <div class="message-content">
+      <p>{{ message }}</p>
+      <p class="created-at">
+       {{ timeAgo }}
+      </p>
+    </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-const {id,user } =defineProps({
-  id: Number,
-  user: Object,
-  chatRoomId: String,
-  body: String
-})
+<style scoped>
+/* Add your own styles here */
+.message-card {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+}
 
-const { session } = useAuth();
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
 
-</script>
+.message-content {
+  flex-grow: 1;
+}
 
-<style>
-/* Add any additional styling if needed */
+.created-at {
+  font-size: 12px;
+  color: #888;
+}
+
+.own-message {
+  justify-content: flex-end;
+}
 </style>
