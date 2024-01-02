@@ -5,7 +5,6 @@ import type { ServerWebSocket, WebSocketCompressor } from 'bun'
 // @ts-expect-error it is there
 import { trapUnhandledNodeErrors } from '#internal/nitro/utils'
 
-const nitroApp = useNitroApp()
 console.log('custom dev server')
 
 type ServerWS = ServerWebSocket<{ username: string, auth: { id?: string, email?: string, name?: string, image?: string }, channels: string[] }>
@@ -28,7 +27,7 @@ interface WebSocketHandler {
 
 interface Message {
   type: 'auth' | 'subscribe' | 'unsubscribe' | 'publish'
-  data: { channel: string, message?: string, event?: string, auth?: { id?: string, email?: string, name?: string, image?:string }, createdAt?: Date }
+  data: { channel: string, message?: string, event?: string, auth?: { id?: string, email?: string, name?: string, image?: string }, createdAt?: Date }
 }
 
 function publish(event: Message) {
@@ -39,6 +38,10 @@ const websocket: WebSocketHandler = {
   open(ws) {
     ws.subscribe('general')
     ws.data.channels = []
+    const interval = setInterval(() => {
+      ws.ping('ping')
+    }, 1000)
+    useNitroApp().hooks.hook('close', () => clearInterval(interval))
   },
   async message(ws, message) {
     const msg = JSON.parse(message as string) as Message
@@ -81,24 +84,21 @@ const websocket: WebSocketHandler = {
     ws.unsubscribe('general')
   },
 }
-const server = Bun.serve<{ username: string }>({
+const server = Bun.serve({
   port: 8002,
   reusePort: true,
   async fetch(req, server) {
+    const nitroApp = useNitroApp()
     // @ts-expect-error it is there
     const handler = toWebHandler(nitroApp.h3App)
     return await handler(req, { server, request: req })
   },
   websocket,
 })
-// console.log('custom dev server pid', process.pid)
-
-// nitroApp.hooks.hook(, function_)
 
 parentPort?.postMessage({
   event: 'listen',
   address: { host: 'localhost', port: server.port },
-  // address: { socketPath: getUnix()},
 })
 
 // Trap unhandled errors
@@ -106,8 +106,9 @@ trapUnhandledNodeErrors()
 
 // Graceful shutdown
 async function onShutdown(signal?: string) {
-  server.reload(server)
-  await nitroApp.hooks.callHook('close')
+  server.stop(true)
+  const nitro = useNitroApp().hooks.callHook('close')
+  // await nitroApp.hooks.callHook('close')
 }
 
 parentPort?.on('message', async (msg) => {

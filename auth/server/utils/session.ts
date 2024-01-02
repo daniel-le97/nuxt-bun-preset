@@ -1,5 +1,4 @@
 import type { H3Event, SessionConfig } from 'h3'
-import crypto from 'uncrypto'
 
 const sessionConfig = (useRuntimeConfig().auth || {}) as SessionConfig
 
@@ -24,14 +23,4 @@ export async function requireAuthSession(event: H3Event) {
     })
   }
   return session
-}
-
-export async function hash(str: string) {
-  const msgUint8 = new TextEncoder().encode(str)
-  const hashBuffer = await crypto.subtle.digest('SHA-512', msgUint8)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-  return hashHex
 }

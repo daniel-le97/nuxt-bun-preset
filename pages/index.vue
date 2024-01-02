@@ -17,10 +17,9 @@ interface Message {
   message: string
   createdAt: string
 }
-const {data: messages} = useFetch<Message[]>('/api/channels/1')
+const { data: messages } = useFetch<Message[]>('/api/channels/1')
 
 const newMessage = ref('')
-
 
 // In script setup
 const chatRooms = ref([

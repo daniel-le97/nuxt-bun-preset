@@ -1,18 +1,33 @@
 <script setup>
 // Props
-const props = defineProps([ 'userId', 'userAvatar', 'message', 'createdAt'])
-const id = useAuth().session?.id
-const timeAgo = useTimeAgo(props.createdAt)
+const { userAvatar, userId, message, createdAt } = defineProps(['userId', 'userAvatar', 'message', 'createdAt'])
+const auth = useAuth()
+const user = useState('auth').value
+const isOwnMessage = computed(() => auth.session.value.id === userId)
+// console.log({same: same.value, user});
+const timeAgo = useTimeAgo(createdAt)
 </script>
 
 <template>
-  <div class="message-card" :class="[{ 'own-message': userId === id }]">
-    <img :src="userAvatar" alt="User Avatar" class="user-avatar">
-    <div class="message-content">
-      <p>{{ message }}</p>
-      <p class="created-at">
-       {{ timeAgo }}
-      </p>
+  <div>
+    <div v-if="isOwnMessage" class="message-card flex justify-end">
+      <img :src="userAvatar" alt="User Avatar" class="user-avatar">
+      <div class="message-content">
+        <p>{{ message }}</p>
+        <!-- <div> cats </div> -->
+        <p class="created-at">
+          {{ timeAgo }}
+        </p>
+      </div>
+    </div>
+    <div v-else class="message-card">
+      <img :src="userAvatar" alt="User Avatar" class="user-avatar">
+      <div class="message-content">
+        <p>{{ message }}</p>
+        <p class="created-at">
+          {{ timeAgo }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -41,9 +56,5 @@ const timeAgo = useTimeAgo(props.createdAt)
 .created-at {
   font-size: 12px;
   color: #888;
-}
-
-.own-message {
-  justify-content: flex-end;
 }
 </style>

@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
       statusCode: 401,
     })
   }
-  if (!user.password || user.password !== (await hash(password))) {
+  if (!Bun.password.verify(password, user.password)) {
     throw createError({
       message: 'Incorrect password!',
       statusCode: 401,

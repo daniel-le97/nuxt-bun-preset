@@ -9,13 +9,14 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const webSocket = new WebSocket('ws://localhost:8002/ws')
   // console.log('ws', webSocket.value.readyState)
   const auth = useAuth()
-  console.log('user', auth.session.value)
+  // console.log('user', auth.session.value)
 
   // ws.readyState.
   webSocket.addEventListener('open', (event) => {
     console.log('Connection open')
     if (auth.session.value?.id) {
-      console.log('user', auth.session.value)
+      useState('auth', () => auth.session.value)
+      // console.log('user', auth.session.value)
       webSocket.send(send({ type: 'auth', data: { channel: auth.session.value.id, auth: auth.session.value } }))
     }
 

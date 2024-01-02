@@ -5,7 +5,7 @@ export default eventHandler(async (event) => {
     email,
     name,
     image: `https://api.dicebear.com/7.x/initials/svg?seed=${name}`,
-    password: await hash(password),
+    password: await Bun.password.hash(password),
   })
   return {
     message: 'Successfully registered!',

@@ -42,5 +42,5 @@ export async function updateUserByEmail(email: string, updates: Partial<User>) {
 }
 
 function getUserKey(email: string) {
-  return `db:auth:users:${encodeURIComponent(email)}`
+  return `auth:users:${encodeURIComponent(email)}`
 }

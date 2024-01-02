@@ -8,6 +8,12 @@ export default defineNuxtConfig({
   nitro: {
     entry: dev ? './preset/entry.dev.ts' : undefined,
     preset: './server/preset',
+    typescript: {
+      tsConfig: {
+        exclude: ['../eslint.config.js'],
+        include: ['../auth/server'],
+      },
+    },
   },
 
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
