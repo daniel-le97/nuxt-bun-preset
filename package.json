@@ -3,13 +3,15 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "bun --bun nuxt build",
     "dev": "bun --bun nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "preview": "bun --bun nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "db": "bun ./auth/server/utils/sqlite.ts",
+    "remove": "rm db.sqlite*"
   },
   "dependencies": {
     "@types/bun": "^1.0.0"

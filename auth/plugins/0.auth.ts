@@ -39,7 +39,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   if (process.client) {
     watch(loggedIn, async (loggedIn) => {
       if (!loggedIn) {
-        console.log('navigating to login')
+        //console.log('navigating to login')
         await navigateTo('/login')
       }
     })

@@ -10,15 +10,13 @@ const icon = computed(() => $auth.session.value?.email ? 'i-heroicons-lock-open'
   <NuxtLink to="/">
     Home
   </NuxtLink>
-  <NuxtLink to="/secret">
-    Secret
-  </NuxtLink>
   <NuxtLink v-if="!$auth.loggedIn.value" to="/login">
     Login
   </NuxtLink>
   <NuxtLink v-else to="/profile">
     Profile
   </NuxtLink>
+  {{ $auth.session.value?.id }}
   <!-- </template> -->
   <NuxtPage />
   <!-- to show toasts -->

@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import type { NewMessage } from '../server/utils/message'
+
+definePageMeta({
+  auth: true,
+})
 useHead({
   title: 'Home Page',
 })
@@ -6,18 +11,11 @@ useHead({
 const { session } = useAuth()
 const fakeMessages = ref()
 
-interface Message {
-  channel: string
-  auth: {
-    id: string
-    name: string
-    email?: string
-    image?: string
-  }
-  message: string
-  createdAt: string
-}
-const { data: messages } = useFetch<Message[]>('/api/channels/1')
+const channel = ref({ id: 1, title: 'General Chat' })
+const { data: messages, refresh } = useFetch<NewMessage[]>(`/api/channels`, {
+  query: { channel: channel.value.id },
+})
+// console.log('messages', messages.value)
 
 const newMessage = ref('')
 
@@ -36,21 +34,33 @@ const chatRooms = ref([
 ])
 
 function handleEvent(event: wsChannelEvents) {
-  console.log(event)
+  // console.log('handleEvent', event.data)
+  const message = event.data as NewMessage
+  messages.value?.push(message)
 }
 const sendMsg = ref<{ send: (message: string) => void, unsubscribe: () => void }>()
 onMounted(() => {
-  const sub = useSubscribe(`channel:${1}`, handleEvent)
+  const sub = useSubscribe(`channel:${channel.value.id}`, handleEvent)
   sendMsg.value = sub
 })
 
-function nextChanel(id: string) {
+async function nextChanel(data: { id: number, title: string }) {
+  channel.value = data
   sendMsg.value?.unsubscribe?.()
-  const sub = useSubscribe(`channel:${id}`, handleEvent)
+  await refresh()
+  const sub = useSubscribe(`channel:${data.id}`, handleEvent)
   sendMsg.value = sub
 }
 
+const regex = /^\s*$/g
+
+function isValidString(input: string) {
+  return !regex.test(input)
+}
+
 function click() {
+  if (!isValidString(newMessage.value))
+    return
   sendMsg.value?.send?.(newMessage.value)
   newMessage.value = ''
 }
@@ -66,15 +76,34 @@ function click() {
           Chat Rooms
         </div>
         <div class="p-2 flex flex-col gap-4 ">
-          <UButton v-for="i in chatRooms" :key="i.id" variant="link" class=" text-xl text-emerald-400">
+          <button v-for="i in chatRooms" :key="i.id" variant="link" class=" text-xl text-emerald-400" @click="nextChanel(i)">
             {{ i.title }}
-          </UButton>
+          </button>
         </div>
       </div>
       <div class="w-5/6 flex flex-col items-center justify-center gap-2">
         <!-- MESSAGE CONTAINER -->
-        <div class="w-full h-full  overflow-y-scroll py-4 px-2 space-y-5">
-          <MessageCard v-for="message in messages" :key="message.channel" :user-avatar="message.auth.image" :user-id="message.auth.id" :created-at="message.createdAt" :message="message.message" />
+        <div class="w-full h-[85vh]  overflow-y-scroll py-4 px-2 space-y-5">
+          <div class="flex justify-center align-middle bg-primary rounded-md">
+            {{ channel.title }}
+          </div>
+          <UAvatarGroup size="sm" :max="2" class="flex justify-center">
+            <UAvatar
+              src="https://avatars.githubusercontent.com/u/739984?v=4"
+              alt="benjamincanac"
+            />
+            <UAvatar
+              src="https://avatars.githubusercontent.com/u/904724?v=4"
+              alt="Atinux"
+            />
+            <UAvatar
+              src="https://avatars.githubusercontent.com/u/7547335?v=4"
+              alt="smarroufin"
+            />
+          </UAvatarGroup>
+          <div v-if="messages?.length! > 1">
+            <MessageCard v-for="message in messages" :key="message.id" :user-avatar="message.image" :user-id="message.userId" :created-at="message.createdAt" :message="message.message" />
+          </div>
         </div>
         <!-- MESSAGE CONTAINER END -->
 

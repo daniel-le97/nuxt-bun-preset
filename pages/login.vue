@@ -33,7 +33,9 @@ async function authEvent(type: 'login' | 'register') {
     await event(data.email, data.password)
     const ws = useNuxtApp().$ws
     const auth = useAuth()
-    ws.send(JSON.stringify({ type: 'auth', data: auth.session.value }))
+    //console.log('clientAuth', auth.session.value)
+    const user = auth.session.value
+    ws.send(send({ type: 'auth', data: { channel: user!.id!, auth: user! } }))
   }
   catch (error) {
     onError(error)

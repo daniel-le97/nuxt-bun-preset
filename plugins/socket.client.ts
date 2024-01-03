@@ -1,12 +1,6 @@
-interface wsChannelEvents {
-  type: 'publish' | 'subscribe' | 'unsubscribe' | 'auth'
-  data: { channel: string, message?: string, event?: string, auth?: { id: string, email: string, name: string }, createdAt?: string }
-}
-
-const send = (event: wsChannelEvents) => JSON.stringify(event)
-
 export default defineNuxtPlugin(async (nuxtApp) => {
-  const webSocket = new WebSocket('ws://localhost:8002/ws')
+  const wsUrl = process.env.NODE_ENV !== 'production' ? 'ws://localhost:9950/ws' : 'ws://localhost:3000/ws'
+  const webSocket = new WebSocket(wsUrl)
   // console.log('ws', webSocket.value.readyState)
   const auth = useAuth()
   // console.log('user', auth.session.value)
@@ -31,7 +25,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
     const newCb = (event: MessageEvent<string | Buffer>) => {
       const message = JSON.parse(event.data as string) as wsChannelEvents
-      if (message.type === 'publish' && message.data.channel === channel)
+      if (message.data.channel && message.data.channel === channel)
         cb(message)
     }
     webSocket.addEventListener('message', newCb)
