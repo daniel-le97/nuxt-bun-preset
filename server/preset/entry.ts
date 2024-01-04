@@ -13,7 +13,7 @@ const server = Bun.serve({
       return await handler(req, { server, request: req })
     }
     catch (error) {
-
+      console.error(req.url, error)
     }
   },
   websocket,

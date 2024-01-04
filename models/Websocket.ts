@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 const webSocketSchema = z.object({
-  type: z.enum(['publish', 'subscribe', 'unsubscribe', 'auth']),
+  type: z.enum(['publish', 'subscribe', 'unsubscribe', 'auth', 'heartbeat']),
   data: z.object({
-    channel: z.string(),
+    channel: z.string().optional(),
     message: z.string().optional(),
     event: z.string().optional(),
     auth: z.object({
@@ -13,13 +13,14 @@ const webSocketSchema = z.object({
       image: z.string().optional(),
     }).optional(),
     createdAt: z.string().optional(),
+    id: z.string().optional(),
   }),
 })
 
 export interface WebSocketSchema {
-  type: 'publish' | 'subscribe' | 'unsubscribe' | 'auth'
+  type: 'publish' | 'subscribe' | 'unsubscribe' | 'auth' | 'heartbeat'
   data: {
-    channel: string
+    channel?: string
     message?: string
     event?: string
     auth?: {
@@ -29,6 +30,7 @@ export interface WebSocketSchema {
       image?: string
     }
     createdAt?: string
+    id?:  string
   }
 }
 
@@ -47,8 +49,22 @@ export const parse = z
     return JSON.stringify(x)
   })
 
-  // for some reason client will not accept this type 
-// export type WsSchema = z.infer<typeof webSocketSchema> 
+export const unparse = z
+  .function()
+  .args(z.string()) // accepts an arbitrary number of arguments
+  .returns(webSocketSchema)
+  .implement((x) => {
+    const message = webSocketSchema.parse(x)
+    // TypeScript knows x is a string!
+    return message as WebSocketSchema
+  })
+
+export const WsParser = {
+  parse,
+  stringify: unparse,
+}
+// for some reason client will not accept this type
+export type WsSchema = z.infer<typeof webSocketSchema>
 
 export function WebSocketSchemaToString(data: WebSocketSchema) {
   return JSON.stringify(webSocketSchema.parse(data))

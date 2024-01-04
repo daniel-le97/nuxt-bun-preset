@@ -33,78 +33,90 @@ const chatRooms = ref([
   { id: 10, title: 'Movie Buffs' },
 ])
 
-// function handleEvent(event: wsChannelEvents) {
-//   console.log('handleEvent', event)
-//   if (event.type === 'publish') {
-//     const message = event.data as NewMessage
-//     useToast().add({ title: `${event.type}:${event.data.channel}`, description: JSON.stringify(event) })
-//     data.value?.messages.push(message)
-//   }
-//   if (event.type === 'subscribe') {
-//     const user = event.data.auth as User
-//     const found = data.value?.users.find(i => i.id === user.id)
-//     if (found)
-//       return
-//     data.value?.users.push(user)
-//   }
-//   if (event.type === 'unsubscribe' && data.value) {
-//     const user = event.data.auth as User
-//     data.value.users = data.value?.users.filter(i => i.id !== user.id)
-//   }
-// }
 const sendMsg = ref<{ send: (message: string) => void, unsubscribe: () => void }>()
 type ws<T = any> = ReturnType<typeof useWebSocket<T>>
 const socket = ref<ws>()
-
+const interval = ref<ReturnType<typeof setInterval>>()
 const port = ref(3000)
 
 onMounted(async () => {
-  console.log('mounted')
+  const vis = useDocumentVisibility()
+  // const location = useGeolocation()
+
+  // if (location.isSupported.value)
+  //   console.log('location', location.isSupported.value)
+
+  // const latitude = location.coords.value.latitude
+  // const longitude = location.coords.value.longitude
+  // // Construct the Nominatim API URL
+  // const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+  // const fetched = await $fetch(apiUrl)
+  // console.log('fetched', fetched)
+
   if (process.env.NODE_ENV !== 'production') {
     const _port = await $fetch('/api/server') as number
     port.value = _port
   }
   const url = `ws://localhost:${port.value}/ws`
-  socket.value = useWebSocket(url)
-  watch(socket.value, (val) => {
-    if (!val.data)
-      return
-    const event = StringToWebSocketSchema(val.data as unknown as string)
-    if (event.type === 'publish') {
-      const message = event.data
-      console.log('message', message);
-      
-      useToast().add({ title: `${event.type}:${event.data.channel}`, description: JSON.stringify(event) })
-      // data.value?.messages.push(message)
-    }
-    if (event.type === 'subscribe') {
-      const user = event.data.auth as User
-      const found = data.value?.users.find(i => i.id === user.id)
-      if (found)
+  socket.value = useWebSocket(url, {
+    onConnected(ws) {
+      interval.value = setInterval(() => {
+        ws.send(JSON.stringify({ type: 'heartbeat', data: { message: vis.value } }))
+      }, 5000)
+    },
+    onMessage(ws, _event) {
+      console.log('onMessage', _event.data)
+      if (!_event.data)
         return
-      data.value?.users.push(user)
-    }
-    if (event.type === 'unsubscribe' && data.value) {
-      const user = event.data.auth as User
-      data.value.users = data.value?.users.filter(i => i.id !== user.id)
-    }
 
-    // const message
+      if (String(_event.data) === 'pong') {
+        // console.log('pong', _event.data)
+        return
+      }
+
+      const event = StringToWebSocketSchema(_event.data as unknown as string)
+      if (event.type === 'publish') {
+        const message = event.data
+        const formatted: MessageSchema = {
+          id: Number(message.id),
+          userId: message.auth!.id!,
+          message: message.message!,
+          image: message.auth!.image!,
+          createdAt: message.createdAt!,
+          channel: message.channel!,
+          name: message.auth!.name!,
+        }
+        useToast().add({ title: `${event.type}:${event.data.channel}`, description: JSON.stringify(event) })
+        data.value?.messages.push(formatted)
+      }
+      if (event.type === 'subscribe') {
+        const user = event.data.auth as User
+        const found = data.value?.users.find(i => i.id === user.id)
+        if (found)
+          return
+        data.value?.users.push(user)
+      }
+      if (event.type === 'unsubscribe' && data.value?.users) {
+        const user = event.data.auth as User
+        data.value.users = data.value?.users.filter(i => i.id !== user.id)
+      }
+    },
+    onDisconnected(ws) {
+      clearInterval(interval.value)
+      console.log('onDisconnected')
+    },
   })
 
   socket.value.send(WebSocketSchemaToString({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } }))
-  // watch(socket.value.data, (val) => {
-  //   console.log('socketData', val)
-  // })
+})
 
-  // const sub = useSubscribe(`channel:${channel.value.id}`, handleEvent)
-  // sendMsg.value = sub
+onUnmounted(() => {
+  clearInterval(interval.value)
+  socket.value?.close?.()
 })
 
 async function nextChanel(_channel: { id: number, title: string }) {
   channel.value = _channel
-  // sendMsg.value?.unsubscribe?.()
-  // const sub = useSubscribe(`channel:${_channel.id}`, handleEvent)
   const newData = await $fetch<{ messages: MessageSchema[], users: User[] }>(`/api/channels?channel=${_channel.id}`)
   data.value = newData
   // sendMsg.value = sub

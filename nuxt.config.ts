@@ -7,33 +7,31 @@ if (!process.env.NUXT_AUTH_PASSWORD) {
 export default defineNuxtConfig({
   experimental: {
     componentIslands: true,
-    
+
   },
+
   devtools: { enabled: true },
-  imports:{
-    dirs: ['./models']
+  imports: {
+    dirs: ['./models'],
   },
-  
 
-
-  // modules: ['@hebilicious/authjs-nuxt']
   nitro: {
-  experimental: {
-    openAPI: true,
-  },
+    experimental: {
+      openAPI: true,
+    },
     runtimeConfig: {
       auth: {
         name: 'nuxt-session',
         password: process.env.NUXT_AUTH_PASSWORD || '',
-        
+
       },
 
     },
     storage: {
-      db: { driver: 'fs', base: './.data' },
+      db: { driver: 'fsLite', base: './.data' },
     },
-    imports:{
-      dirs: ['./models']
+    imports: {
+      dirs: ['./models'],
     },
     entry: dev ? './preset/entry.dev.ts' : undefined,
     preset: './server/preset',

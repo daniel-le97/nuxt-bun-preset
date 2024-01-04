@@ -11,10 +11,10 @@ export default eventHandler(async (event) => {
     console.log('error', error)
   }
   try {
-    console.log();
-    
-  } catch (error) {
-    
+    console.log()
+  }
+  catch (error) {
+
   }
 })
 

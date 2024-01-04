@@ -28,7 +28,6 @@
 export default defineNuxtPlugin(async (nuxtApp) => {
   // const data = await $fetch('/api/server')
   // console.log('data', data, globalThis.window);
-  
 
   // const webSocket = await useWebsocket()
 

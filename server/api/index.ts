@@ -1,3 +1,4 @@
 export default defineEventHandler(async (event) => {
-  return 'Hello World!'
+  const id = crypto.randomUUID()
+  return `Hello World! ${id}`
 })

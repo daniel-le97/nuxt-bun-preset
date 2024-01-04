@@ -29,6 +29,7 @@ declare module 'h3' {
 
 // console.log('custom dev server')
 const nitroApp = useNitroApp()
+
 // @ts-expect-error H3App is App
 const handler = toWebHandler(nitroApp.h3App)
 
@@ -62,6 +63,8 @@ nitroApp.router.use(
   ),
 )
 
+// const routes = nitroApp.h3App.stack
+// console.log('routes', routes);
 const server = Bun.serve({
   port: 0,
   reusePort: true,
@@ -70,7 +73,6 @@ const server = Bun.serve({
       return await handler(req, { server, request: req })
     }
     catch (error) {
-
       console.error(req.url, error)
     }
   },
@@ -90,17 +92,20 @@ parentPort?.postMessage({
   address: { host: 'localhost', port: server.port },
 })
 
+// console.log(Bun.main, Bun.isMainThread, Bun.origin, Bun.argv);
+
 // Trap unhandled errors
 trapUnhandledNodeErrors()
 
 // Graceful shutdown
 async function onShutdown(signal?: string) {
+  console.log('onShutdown')
   server.stop(true)
-  nitroApp.hooks.callHook('close')
+  await nitroApp.hooks.callHook('close')
   parentPort?.postMessage({ event: 'exit' })
   Bun.gc(true)
-  // db.prepare('DELETE FROM subscriptions').run()
-  // await nitroApp.hooks.callHook('close')
+
+  db.prepare('DELETE FROM subscriptions').run()
 }
 
 parentPort?.on('message', async (msg) => {

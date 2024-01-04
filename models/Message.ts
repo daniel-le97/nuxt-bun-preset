@@ -11,13 +11,13 @@ export interface MessageSchema {
 }
 
 const messageSchema = z.object({
-    id: z.number(),
-    channel: z.string(),
-    message: z.string(),
-    createdAt: z.string(),
-    name: z.string(),
-    userId: z.string(),
-    image: z.string(),
+  id: z.number(),
+  channel: z.string(),
+  message: z.string(),
+  createdAt: z.string(),
+  name: z.string(),
+  userId: z.string(),
+  image: z.string(),
 }).passthrough()
 
 export function StringToMessage(string: string) {
