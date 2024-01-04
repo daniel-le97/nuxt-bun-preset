@@ -31,11 +31,12 @@ async function authEvent(type: 'login' | 'register') {
     const event = type === 'register' ? authRegister : authLogin
     const data = type === 'login' ? { email: loginForm.value.email, password: loginForm.value.password } : { email: registerForm.value.email, password: registerForm.value.password }
     await event(data.email, data.password)
-    const ws = useNuxtApp().$ws
-    const auth = useAuth()
-    //console.log('clientAuth', auth.session.value)
-    const user = auth.session.value
-    ws.send(send({ type: 'auth', data: { channel: user!.id!, auth: user! } }))
+
+    // const ws = useNuxtApp().$ws
+    // const auth = useAuth()
+    // // console.log('clientAuth', auth.session.value)
+    // const user = auth.session.value
+    // ws.send(send({ type: 'auth', data: { channel: user!.id!, auth: user! } }))
   }
   catch (error) {
     onError(error)

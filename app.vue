@@ -20,6 +20,7 @@ const icon = computed(() => $auth.session.value?.email ? 'i-heroicons-lock-open'
   <!-- </template> -->
   <NuxtPage />
   <!-- to show toasts -->
-  <UNotifications />
-  <!-- </NuxtExample> -->
+  <ClientOnly>
+    <UNotifications />
+  </ClientOnly>
 </template>

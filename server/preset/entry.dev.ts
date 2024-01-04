@@ -1,25 +1,89 @@
 import '#internal/nitro/virtual/polyfill'
 import { parentPort } from 'node:worker_threads'
+
+// import {
+//   defineEventHandler,
+//   getQuery,
+//   getRouterParam,
+//   readBody,
+// } from 'h3'
+import type { Server } from 'bun'
 import { websocket } from './websocket'
 import { setServer } from './server'
 
 // @ts-expect-error it is there
 import { trapUnhandledNodeErrors } from '#internal/nitro/utils'
 
+// @ts-expect-error it is there
+import { runNitroTask } from '#internal/nitro/task'
+
+// @ts-expect-error it is there
+import { tasks } from '#internal/nitro/virtual/tasks'
+
+declare module 'h3' {
+  interface H3EventContext {
+    server: Server
+    request: Request
+  }
+}
+
 // console.log('custom dev server')
 const nitroApp = useNitroApp()
 // @ts-expect-error H3App is App
 const handler = toWebHandler(nitroApp.h3App)
 
+nitroApp.router.get(
+  '/_nitro/tasks',
+  // @ts-expect-error type import errors
+  defineEventHandler((event) => {
+    return {
+      tasks: Object.fromEntries(
+        Object.entries(tasks).map(([name, task]) => [
+          name,
+          // @ts-expect-error type import errors
+          { description: task.description },
+        ]),
+      ),
+    }
+  },
+  ),
+)
+nitroApp.router.use(
+  '/_nitro/tasks/:name',
+  // @ts-expect-error type import errors
+  defineEventHandler(async (event) => {
+    const name = getRouterParam(event, 'name')
+    const payload = {
+      ...getQuery(event),
+      ...(await readBody(event).catch(() => ({}))),
+    }
+    return await runNitroTask(name, payload)
+  },
+  ),
+)
+
 const server = Bun.serve({
-  port: 9950,
+  port: 0,
   reusePort: true,
   async fetch(req, server) {
-    return await handler(req, { server, request: req })
+    try {
+      return await handler(req, { server, request: req })
+    }
+    catch (error) {
+
+      console.error(req.url, error)
+    }
   },
   websocket,
 })
+
+// @ts-expect-error event is typed differently
+nitroApp.router.get('/api/server', defineEventHandler(event => server.port))
+// console.log('server', server);
+
 setServer(server)
+// @ts-expect-error it is there
+nitroApp.hooks.callHook('server', server)
 
 parentPort?.postMessage({
   event: 'listen',
@@ -34,6 +98,8 @@ async function onShutdown(signal?: string) {
   server.stop(true)
   nitroApp.hooks.callHook('close')
   parentPort?.postMessage({ event: 'exit' })
+  Bun.gc(true)
+  // db.prepare('DELETE FROM subscriptions').run()
   // await nitroApp.hooks.callHook('close')
 }
 

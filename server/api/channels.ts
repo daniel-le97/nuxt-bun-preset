@@ -1,24 +1,43 @@
-import type { NewMessage } from '../utils/message'
-
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   if (!query.channel)
     throw createError('missing channel query')
 
   const key = `channel:${query.channel}`
+  console.log('key', key)
+
   // const db = useStorage('db')
   // const items = await db.getItem(key)
   // return items
   const messages = db.prepare(`
-  SELECT messages.id, messages.channel,
-  messages.message, messages.createdAt,
-  users.name, users.id as userId, users.image
-  FROM messages
-  JOIN users ON messages.user
-  WHERE messages.channel = ?1
-  ORDER BY messages.createdAt`).all(key)
+SELECT
+  messages.id,
+  messages.channel,
+  messages.message,
+  messages.createdAt,
+  users.name,
+  users.id AS userId,
+  users.image
+FROM
+  messages
+JOIN
+  users ON messages.user = users.id
+WHERE
+  messages.channel = ?1
+ORDER BY
+  messages.createdAt;`).all(key) as MessageSchema[]
 
-  // console.log({ messages });
+  const users = db.prepare(`
+  SELECT
+    users.id, users.name, users.image
+  FROM
+    subscriptions
+  JOIN 
+    users ON subscriptions.user = users.id
+  WHERE channel = ?1
+  `).all(key) as User[]
 
-  return messages as NewMessage[]
+  console.log({ messages, users })
+
+  return { messages, users }
 })

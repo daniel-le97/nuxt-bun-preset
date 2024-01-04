@@ -10,7 +10,7 @@ const timeAgo = useTimeAgo(createdAt)
 </script>
 
 <template>
-  <div class="flex w-full" :class="isOwnMessage ? 'justify-end' : 'justify-start'" v-if="message">
+  <div v-if="message" class="flex w-full" :class="isOwnMessage ? 'justify-end' : 'justify-start'">
     <div class="message-card justify-start flex gap-3" :class="isOwnMessage ? '' : ''">
       <img :src="userAvatar" alt="User Avatar" class="user-avatar" :class="isOwnMessage ? 'order-2' : 'order-1'">
       <div class="message-content" :class="isOwnMessage ? ' order-1' : 'order-2'">

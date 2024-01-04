@@ -1,4 +1,4 @@
-import type { AuthSession } from '~~/auth/server/utils/session'
+import type { AuthSession } from '~/server/utils/session'
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   // Skip plugin when rendering error page
@@ -39,7 +39,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   if (process.client) {
     watch(loggedIn, async (loggedIn) => {
       if (!loggedIn) {
-        //console.log('navigating to login')
+        // console.log('navigating to login')
         await navigateTo('/login')
       }
     })

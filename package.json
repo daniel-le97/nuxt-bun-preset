@@ -14,7 +14,9 @@
     "remove": "rm db.sqlite*"
   },
   "dependencies": {
-    "@types/bun": "^1.0.0"
+    "@types/bun": "^1.0.0",
+    "valibot": "^0.25.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.1",
