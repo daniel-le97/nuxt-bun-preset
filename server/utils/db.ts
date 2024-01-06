@@ -26,7 +26,6 @@ export function removeSubscription(channel: string, user: string) {
   db.prepare('DELETE FROM subscriptions WHERE channel = $channel AND user = $user').run({ $channel: channel, $user: user })
 }
 
-
 export function getMessagesAndUsers(key: string) {
   const messages = db.query(`
   SELECT

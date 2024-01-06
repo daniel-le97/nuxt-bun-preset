@@ -9,9 +9,8 @@ export default defineEventHandler(async (event) => {
   // console.log('session', session.data);\
   let upgrade: boolean | undefined
   const res = upgrade ? undefined : createError('unable to upgrade')
-  const channels:string[] = []
+  const channels: string[] = []
   if (session.data.id) {
-
     const auth = {
       id: session.data.id,
       name: session.data.name,
@@ -20,6 +19,6 @@ export default defineEventHandler(async (event) => {
     upgrade = context.server.upgrade(context.request, { data: { socketId, auth, channels } })
     return res
   }
-  upgrade = context.server.upgrade(context.request, { data: { socketId, channels} })
+  upgrade = context.server.upgrade(context.request, { data: { socketId, channels } })
   return res
 })

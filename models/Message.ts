@@ -28,4 +28,3 @@ export function StringToMessage(string: string) {
 export function MessageToString(data: MessageSchema) {
   return JSON.stringify(messageSchema.parse(data))
 }
-

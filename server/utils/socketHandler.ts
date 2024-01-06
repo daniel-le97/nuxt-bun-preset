@@ -17,5 +17,3 @@ export const defineSocketHandler: (handler: SocketHandler) => SocketHandler = (h
     await handler(server, ws, payload)
   }
 }
-
-

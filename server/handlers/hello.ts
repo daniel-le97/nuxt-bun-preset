@@ -1,4 +1,5 @@
-// this works but u will need to import everything you need, auto imports do not work
 export default defineSocketHandler(async (server, ws, payload) => {
+  // server is the Bun server instance
+  // ws is the WebSocket instance
   console.log('server:ws:handler:test', payload)
 })

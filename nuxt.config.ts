@@ -83,8 +83,8 @@ export default defineNuxtConfig({
         target: 'esnext',
       },
     },
-    entry: dev ? './preset/entry.dev.ts' : undefined,
-    preset: './server/preset',
+    entry: dev ? './core/entry.dev.ts' : undefined,
+    preset: './server/core',
     typescript: {
       tsConfig: {
         exclude: ['../eslint.config.js'],

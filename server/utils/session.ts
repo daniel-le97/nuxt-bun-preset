@@ -1,7 +1,5 @@
 import type { H3Event, SessionConfig } from 'h3'
 
-import { useStorage } from '#imports'
-
 const sessionConfig = (useRuntimeConfig().auth || {}) as SessionConfig
 
 export interface AuthSession {
