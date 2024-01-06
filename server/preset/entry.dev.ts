@@ -1,13 +1,7 @@
 import '#internal/nitro/virtual/polyfill'
 import { parentPort } from 'node:worker_threads'
-
-// import {
-//   defineEventHandler,
-//   getQuery,
-//   getRouterParam,
-//   readBody,
-// } from 'h3'
-import type { Server } from 'bun'
+import { Glob } from 'bun'
+import type { Server, ServerWebSocket } from 'bun'
 import { websocket } from './websocket'
 import { setServer } from './server'
 
@@ -26,6 +20,7 @@ declare module 'h3' {
     request: Request
   }
 }
+
 
 // console.log('custom dev server')
 const nitroApp = useNitroApp()
@@ -104,7 +99,7 @@ async function onShutdown(signal?: string) {
   await nitroApp.hooks.callHook('close')
   parentPort?.postMessage({ event: 'exit' })
   Bun.gc(true)
-
+  Bun.shrink()
   db.prepare('DELETE FROM subscriptions').run()
 }
 

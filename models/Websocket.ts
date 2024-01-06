@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const webSocketSchema = z.object({
-  type: z.enum(['publish', 'subscribe', 'unsubscribe', 'auth', 'heartbeat']),
+  type: z.enum(['publish', 'subscribe', 'unsubscribe', 'auth', 'heartbeat', 'typing', "tests"]),
   data: z.object({
     channel: z.string().optional(),
     message: z.string().optional(),
@@ -18,7 +18,7 @@ const webSocketSchema = z.object({
 })
 
 export interface WebSocketSchema {
-  type: 'publish' | 'subscribe' | 'unsubscribe' | 'auth' | 'heartbeat'
+  type: 'publish' | 'subscribe' | 'unsubscribe' | 'auth' | 'heartbeat' | 'typing' | "tests"
   data: {
     channel?: string
     message?: string
@@ -32,7 +32,13 @@ export interface WebSocketSchema {
     createdAt?: string
     id?:  string
   }
+
 }
+
+
+
+
+
 
 export function StringToWebSocketSchema(string: string) {
   const message = JSON.parse(string)

@@ -41,31 +41,18 @@ const port = ref(3000)
 
 onMounted(async () => {
   const vis = useDocumentVisibility()
-  // const location = useGeolocation()
 
-  // if (location.isSupported.value)
-  //   console.log('location', location.isSupported.value)
-
-  // const latitude = location.coords.value.latitude
-  // const longitude = location.coords.value.longitude
-  // // Construct the Nominatim API URL
-  // const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-  // const fetched = await $fetch(apiUrl)
-  // console.log('fetched', fetched)
-
-  if (process.env.NODE_ENV !== 'production') {
-    const _port = await $fetch('/api/server') as number
-    port.value = _port
-  }
-  const url = `ws://localhost:${port.value}/ws`
+  const _port = import.meta.dev ? await $fetch('/api/server') as number : 3000
+  const url = `ws://localhost:${_port}`
   socket.value = useWebSocket(url, {
     onConnected(ws) {
+      subscribe()
       interval.value = setInterval(() => {
         ws.send(JSON.stringify({ type: 'heartbeat', data: { message: vis.value } }))
       }, 5000)
     },
     onMessage(ws, _event) {
-      console.log('onMessage', _event.data)
+      console.log('client:ws:message', _event.data)
       if (!_event.data)
         return
 
@@ -75,6 +62,10 @@ onMounted(async () => {
       }
 
       const event = StringToWebSocketSchema(_event.data as unknown as string)
+      if (event.type === 'typing') {
+        console.log('typing', event.data)
+        return
+      }
       if (event.type === 'publish') {
         const message = event.data
         const formatted: MessageSchema = {
@@ -86,18 +77,32 @@ onMounted(async () => {
           channel: message.channel!,
           name: message.auth!.name!,
         }
-        useToast().add({ title: `${event.type}:${event.data.channel}`, description: JSON.stringify(event) })
         data.value?.messages.push(formatted)
+        if (formatted.userId !== auth.session.value?.id)
+          useToast().add({ title: `${event.type}:${event.data.channel}`, description: event.data.message || '' })
       }
       if (event.type === 'subscribe') {
         const user = event.data.auth as User
         const found = data.value?.users.find(i => i.id === user.id)
-        if (found)
+        if (found || user.id === auth.session.value?.id)
           return
+
+        if (user.name)
+          useToast().add({ title: `${user.name} joined the channel` })
+
         data.value?.users.push(user)
       }
       if (event.type === 'unsubscribe' && data.value?.users) {
         const user = event.data.auth as User
+
+        if (user.id === auth.session.value?.id)
+          return
+
+        const found = data.value?.users.find(i => i.id === user.id)
+        if (!found)
+          return
+
+        useToast().add({ title: `${found.name} left the channel` })
         data.value.users = data.value?.users.filter(i => i.id !== user.id)
       }
     },
@@ -115,8 +120,21 @@ onUnmounted(() => {
   socket.value?.close?.()
 })
 
+function subscribe() {
+  socket.value?.send?.(WebSocketSchemaToString({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } }))
+}
+function unsubscribe() {
+  socket.value?.send?.(WebSocketSchemaToString({ type: 'unsubscribe', data: { channel: `channel:${channel.value.id}` } }))
+}
+
 async function nextChanel(_channel: { id: number, title: string }) {
+  if (channel.value.id === _channel.id)
+    return
+
+  unsubscribe()
   channel.value = _channel
+  subscribe()
+
   const newData = await $fetch<{ messages: MessageSchema[], users: User[] }>(`/api/channels?channel=${_channel.id}`)
   data.value = newData
   // sendMsg.value = sub
@@ -128,10 +146,20 @@ function isValidString(input: string) {
   return !regex.test(input)
 }
 
+const debounced = useDebounceFn(() => {
+  if (!isValidString(newMessage.value))
+    return
+
+  console.log('typing', newMessage.value)
+  socket.value?.send?.(WebSocketSchemaToString({ type: 'typing', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
+}, 2000)
 function handleKeyPress(e: any) {
   e.preventDefault()
   if (e.key === 'Enter')
     click()
+
+  else
+    debounced()
 }
 
 function click() {
@@ -139,6 +167,8 @@ function click() {
     return
 
   console.log('click', newMessage.value)
+
+  socket.value?.send?.(WebSocketSchemaToString({ type: 'tests', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
 
   socket.value?.send?.(WebSocketSchemaToString({ type: 'publish', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
   // sendMsg.value?.send?.(newMessage.value)

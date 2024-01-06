@@ -48,8 +48,8 @@ function getAddress() {
 const listenAddress = getAddress()
 const listener = server.listen(listenAddress, () => {
   const _address = server.address()
-  console.log('listening on', _address);
-  
+  console.log('listening on', _address)
+
   parentPort?.postMessage({
     event: 'listen',
     address:
@@ -59,32 +59,35 @@ const listener = server.listen(listenAddress, () => {
   })
 })
 
-// Register tasks handlers
-// nitroApp.router.get(
-//   '/_nitro/tasks',
-//   // 
-//   defineEventHandler((event) => {
-//     return {
-//       tasks: Object.fromEntries(
-//         Object.entries(tasks).map(([name, task]) => [
-//           name,
-//           { description: task.description },
-//         ]),
-//       ),
-//     }
-//   }),
-// )
-// nitroApp.router.use(
-//   '/_nitro/tasks/:name',
-//   defineEventHandler(async (event) => {
-//     const name = getRouterParam(event, 'name')
-//     const payload = {
-//       ...getQuery(event),
-//       ...(await readBody(event).catch(() => ({}))),
-//     }
-//     return await runNitroTask(name, payload)
-//   }),
-// )
+nitroApp.router.get(
+  '/_nitro/tasks',
+  // @ts-expect-error type import errors
+  defineEventHandler((event) => {
+    return {
+      tasks: Object.fromEntries(
+        Object.entries(tasks).map(([name, task]) => [
+          name,
+          // @ts-expect-error type import errors
+          { description: task.description },
+        ]),
+      ),
+    }
+  },
+  ),
+)
+nitroApp.router.use(
+  '/_nitro/tasks/:name',
+  // @ts-expect-error type import errors
+  defineEventHandler(async (event) => {
+    const name = getRouterParam(event, 'name')
+    const payload = {
+      ...getQuery(event),
+      ...(await readBody(event).catch(() => ({}))),
+    }
+    return await runNitroTask(name, payload)
+  },
+  ),
+)
 
 // Trap unhandled errors
 trapUnhandledNodeErrors()

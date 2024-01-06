@@ -7,14 +7,59 @@ if (!process.env.NUXT_AUTH_PASSWORD) {
 export default defineNuxtConfig({
   experimental: {
     componentIslands: true,
-
+  },
+  build: {
+    transpile: ['./server/handlers'],
   },
 
   devtools: { enabled: true },
   imports: {
     dirs: ['./models'],
   },
+  tailwindcss: {
+    quiet: true,
+    addTwUtil: true,
+    config: {
+      theme: {
+        extend: {
+          colors: {
+            // Updated color names
+            sky: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              // ... other shades
+              900: '#001e3c',
+            },
+            stone: {
+              50: '#f4f4f4',
+              100: '#e4e4e4',
+              // ... other shades
+              900: '#1a202c',
+            },
+            neutral: {
+              50: '#f9fafb',
+              100: '#f2f4f8',
+              // ... other shades
+              900: '#1a202c',
+            },
+            gray: {
+              50: '#f9fafb',
+              100: '#f2f4f8',
+              // ... other shades
+              900: '#1a202c',
+            },
+            slate: {
+              50: '#f9fafb',
+              100: '#f2f4f8',
+              // ... other shades
+              900: '#1a202c',
+            },
+          },
+        },
+      },
+    },
 
+  },
   nitro: {
     experimental: {
       openAPI: true,
@@ -31,7 +76,12 @@ export default defineNuxtConfig({
       db: { driver: 'fsLite', base: './.data' },
     },
     imports: {
-      dirs: ['./models'],
+      dirs: ['./models', './server/handlers'],
+    },
+    esbuild: {
+      options: {
+        target: 'esnext',
+      },
     },
     entry: dev ? './preset/entry.dev.ts' : undefined,
     preset: './server/preset',
