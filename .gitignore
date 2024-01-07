@@ -5,6 +5,9 @@
 .nitro
 .cache
 dist
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
 
 # Node dependencies
 node_modules
