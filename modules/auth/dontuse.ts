@@ -1,4 +1,4 @@
-import { addImports, addPlugin, addRouteMiddleware, addServerImports, addServerImportsDir, addTypeTemplate, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImports, addPlugin, addRouteMiddleware, addServerImportsDir, addTypeTemplate, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { defu } from 'defu'
 import { configKey } from './runtime/utils'
 

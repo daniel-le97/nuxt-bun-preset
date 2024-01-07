@@ -1,5 +1,5 @@
 import type { StorageValue } from 'unstorage'
-import { createStorage, defineDriver } from 'unstorage'
+import { defineDriver } from 'unstorage'
 import { Database } from 'bun:sqlite'
 
 interface db {

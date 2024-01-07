@@ -21,7 +21,6 @@ export default defineNuxtModule({
     })
 
     const resolve = createResolver(import.meta.url)
-    
 
     nuxt.hooks.hook('ready', () => {
       const nitro = useNitro()
@@ -30,8 +29,7 @@ export default defineNuxtModule({
         await builder(nitro)
       })
       nitro.hooks.hook('rollup:before', (nitro, config) => {
-        console.log('config', config);
-        
+        console.log('config', config)
       })
       nitro.hooks.beforeEach((event) => {
         const found = order.find(key => key === event.name)

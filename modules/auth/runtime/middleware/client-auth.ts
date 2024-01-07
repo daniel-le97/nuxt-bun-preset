@@ -1,5 +1,5 @@
-import { verifyClientSession } from "../lib"
-import { defineNuxtRouteMiddleware, navigateTo, useRuntimeConfig } from "#imports"
+import { verifyClientSession } from '../lib'
+import { defineNuxtRouteMiddleware, navigateTo, useRuntimeConfig } from '#imports'
 
 /**
  * This middleware makes sure that the token is valid
@@ -8,9 +8,11 @@ import { defineNuxtRouteMiddleware, navigateTo, useRuntimeConfig } from "#import
  */
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (process.server) return
+  if (process.server)
+    return
   const valid = await verifyClientSession()
-  if (valid) return
-  if (["client-auth", "auth"].includes(to.meta.middleware) || to.meta.auth === true)
-    return navigateTo(to?.meta?.auth?.guestRedirectTo ?? useRuntimeConfig()?.public?.authJs?.guestRedirectTo ?? "/")
+  if (valid)
+    return
+  if (['client-auth', 'auth'].includes(to.meta.middleware) || to.meta.auth === true)
+    return navigateTo(to?.meta?.auth?.guestRedirectTo ?? useRuntimeConfig()?.public?.authJs?.guestRedirectTo ?? '/')
 })

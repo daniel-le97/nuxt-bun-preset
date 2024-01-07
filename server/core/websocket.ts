@@ -67,14 +67,19 @@ const handlers = new Map<string, (server: BunServer, ws: WS, payload: WebSocketS
 // }
 
 export const websocket: WebSocketHandler<{ socketId: string, auth: { id?: string, name?: string, image?: string }, channels: string[] }> = {
+  sendPings: true,
   open(ws) {
-    console.log('server:ws:open', ws.data)
+    // console.log('server:ws:open', ws.data)
   },
   async message(ws, message) {
     try {
+      if (message === 'pong')
+        return
       const msg = StringToWebSocketSchema(String(message))
       msg.data.createdAt = new Date().toString()
       const hasHandler = handlers.has(msg.type)
+      console.log('server:ws:message', msg.type)
+
       const handler = hasHandler ? handlers.get(msg.type)! : handlers.get('unkown')!
       await handler(Server(), ws, msg)
     }

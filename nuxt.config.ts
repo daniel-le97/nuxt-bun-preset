@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       openAPI: true,
-      wasm:true
+      wasm: true,
     },
     runtimeConfig: {
       auth: {

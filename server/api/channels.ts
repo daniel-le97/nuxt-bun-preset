@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   // user is not in the channel is fetching the channel meaning they are subscribed
   // if they are not in the user
   const foundUser = res.users.find(user => user.id === session.data.id)
-  if (!foundUser){
+  if (!foundUser) {
     const newUser = {
       id: session.data.id,
       name: session.data.name,

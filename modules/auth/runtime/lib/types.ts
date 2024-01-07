@@ -1,4 +1,4 @@
-import type { BuiltInProviderType, ProviderType } from "@auth/core/providers"
+import type { BuiltInProviderType, ProviderType } from '@auth/core/providers'
 
 /**
  * Util type that matches some strings literally, but allows any other string as well.

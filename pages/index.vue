@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { WebSocketSchema } from '../models/Websocket'
+
 console.log('index.vue')
 
 definePageMeta({
@@ -8,8 +10,7 @@ useHead({
   title: 'Home Page',
 })
 
-const { session } = useAuth()
-const fakeMessages = ref()
+// const { session } = useAuth()
 
 const channel = ref({ id: 1, title: 'General Chat' })
 const { data, refresh } = useFetch<{ messages: MessageSchema[], users: User[] }>(`/api/channels`, {
@@ -33,33 +34,31 @@ const chatRooms = ref([
   { id: 10, title: 'Movie Buffs' },
 ])
 
-const sendMsg = ref<{ send: (message: string) => void, unsubscribe: () => void }>()
 type ws<T = any> = ReturnType<typeof useWebSocket<T>>
 const socket = ref<ws>()
+const sendMessage = (message: WebSocketSchema) => socket.value?.send?.(WebSocketSchemaToString(message))
 const interval = ref<ReturnType<typeof setInterval>>()
-const port = ref(3000)
 
 onMounted(async () => {
-  const vis = useDocumentVisibility()
-
   const _port = import.meta.dev ? await $fetch('/api/server') as number : 3000
   const url = `ws://localhost:${_port}`
   socket.value = useWebSocket(url, {
     onConnected(ws) {
       subscribe()
-      interval.value = setInterval(() => {
-        ws.send(JSON.stringify({ type: 'heartbeat', data: { message: vis.value } }))
-      }, 5000)
+      // const vis = useDocumentVisibility()
+      // interval.value = setInterval(() => {
+      //   ws.send(JSON.stringify({ type: 'heartbeat', data: { message: vis.value } }))
+      // }, 5000)
     },
     onMessage(ws, _event) {
       console.log('client:ws:message', _event.data)
       if (!_event.data)
         return
 
-      if (String(_event.data) === 'pong') {
-        // console.log('pong', _event.data)
-        return
-      }
+      // if (String(_event.data) === 'pong') {
+      //   // console.log('pong', _event.data)
+      //   return
+      // }
 
       const event = StringToWebSocketSchema(_event.data as unknown as string)
       if (event.type === 'typing') {
@@ -112,7 +111,7 @@ onMounted(async () => {
     },
   })
 
-  socket.value.send(WebSocketSchemaToString({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } }))
+  sendMessage({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } })
 })
 
 onUnmounted(() => {
@@ -121,10 +120,12 @@ onUnmounted(() => {
 })
 
 function subscribe() {
-  socket.value?.send?.(WebSocketSchemaToString({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } }))
+  sendMessage({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } })
+  // socket.value?.send?.(WebSocketSchemaToString({ type: 'subscribe', data: { channel: `channel:${channel.value.id}` } }))
 }
 function unsubscribe() {
-  socket.value?.send?.(WebSocketSchemaToString({ type: 'unsubscribe', data: { channel: `channel:${channel.value.id}` } }))
+  sendMessage({ type: 'unsubscribe', data: { channel: `channel:${channel.value.id}` } })
+  // socket.value?.send?.(WebSocketSchemaToString({ type: 'unsubscribe', data: { channel: `channel:${channel.value.id}` } }))
 }
 
 async function nextChanel(_channel: { id: number, title: string }) {
@@ -150,8 +151,8 @@ const debounced = useDebounceFn(() => {
   if (!isValidString(newMessage.value))
     return
 
-  console.log('typing', newMessage.value)
-  socket.value?.send?.(WebSocketSchemaToString({ type: 'typing', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
+  // console.log('typing', newMessage.value)
+  sendMessage({ type: 'typing', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } })
 }, 2000)
 function handleKeyPress(e: any) {
   e.preventDefault()
@@ -166,26 +167,31 @@ function click() {
   if (!isValidString(newMessage.value))
     return
 
-  console.log('click', newMessage.value)
+  // socket.value?.send?.(WebSocketSchemaToString({ type: 'tests', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
 
-  socket.value?.send?.(WebSocketSchemaToString({ type: 'tests', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
-
-  socket.value?.send?.(WebSocketSchemaToString({ type: 'publish', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
-  // sendMsg.value?.send?.(newMessage.value)
-  // newMessage.value = ''
+  sendMessage({ type: 'publish', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } })
+  // socket.value?.send?.(WebSocketSchemaToString({ type: 'publish', data: { channel: `channel:${channel.value.id}`, message: newMessage.value } }))
 }
 </script>
 
 <template>
   <main class="text-lg">
-    <div v-if="session?.id" class="flex    min-h-screen ">
+    <div v-if="auth.loggedIn" class="flex  min-h-screen ">
       <div class=" w-1/4 bg-gray-800 py-5">
-        <div class="text-2xl font-extrabold mb-4 px-3 text-emerald-200 underline underline-offset-4">
+        <div class="flex justify-center align-middle pb-3">
+          <ProfileNavigation />
+        </div>
+        <div class=" flex justify-center text-2xl font-extrabold mb-4 px-3 text-emerald-200 underline underline-offset-4">
           Chat Rooms
         </div>
         <div class="p-2 flex flex-col gap-4 ">
           <button v-for="i in chatRooms" :key="i.id" variant="link" class=" text-xl text-emerald-400" @click="nextChanel(i)">
-            {{ i.title }}
+            <p v-if="channel.id === i.id" class="bg-white rounded">
+              {{ i.title }}
+            </p>
+            <p v-else>
+              {{ i.title }}
+            </p>
           </button>
         </div>
       </div>
