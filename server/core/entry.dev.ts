@@ -56,6 +56,8 @@ nitroApp.router.use(
   ),
 )
 
+
+
 // const routes = nitroApp.h3App.stack
 // console.log('routes', routes);
 const server = Bun.serve({

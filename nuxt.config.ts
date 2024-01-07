@@ -19,50 +19,12 @@ export default defineNuxtConfig({
   tailwindcss: {
     quiet: true,
     addTwUtil: true,
-    config: {
-      theme: {
-        extend: {
-          colors: {
-            // Updated color names
-            sky: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              // ... other shades
-              900: '#001e3c',
-            },
-            stone: {
-              50: '#f4f4f4',
-              100: '#e4e4e4',
-              // ... other shades
-              900: '#1a202c',
-            },
-            neutral: {
-              50: '#f9fafb',
-              100: '#f2f4f8',
-              // ... other shades
-              900: '#1a202c',
-            },
-            gray: {
-              50: '#f9fafb',
-              100: '#f2f4f8',
-              // ... other shades
-              900: '#1a202c',
-            },
-            slate: {
-              50: '#f9fafb',
-              100: '#f2f4f8',
-              // ... other shades
-              900: '#1a202c',
-            },
-          },
-        },
-      },
-    },
 
   },
   nitro: {
     experimental: {
       openAPI: true,
+      wasm:true
     },
     runtimeConfig: {
       auth: {

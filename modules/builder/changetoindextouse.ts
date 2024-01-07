@@ -17,9 +17,11 @@ export default defineNuxtModule({
       if (found)
         return
       order.push(`${event.name}`)
+      logger.box(`nuxt:hooks-${event.name}`)
     })
 
-    const { resolve } = createResolver(import.meta.url)
+    const resolve = createResolver(import.meta.url)
+    
 
     nuxt.hooks.hook('ready', () => {
       const nitro = useNitro()
@@ -27,20 +29,25 @@ export default defineNuxtModule({
       nitro.hooks.hook('compiled', async () => {
         await builder(nitro)
       })
+      nitro.hooks.hook('rollup:before', (nitro, config) => {
+        console.log('config', config);
+        
+      })
       nitro.hooks.beforeEach((event) => {
         const found = order.find(key => key === event.name)
         if (found)
           return
         order.push(`${event.name}`)
+        logger.box(`nitro:hooks-${event.name}`)
       })
-    })
 
-    nuxt.hooks.hookOnce('builder:watch', () => {
-      const toObject: Record<number, string> = {}
-      order.forEach((key, index) => {
-        toObject[index] = key
+      nitro.hooks.hookOnce('compiled', () => {
+        const toObject: Record<number, string> = {}
+        order.forEach((key, index) => {
+          toObject[index] = key
+        })
+        Bun.write('hello.json', JSON.stringify(toObject))
       })
-      Bun.write('hello.json', JSON.stringify(toObject))
     })
   },
 })

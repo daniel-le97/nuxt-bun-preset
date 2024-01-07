@@ -14,14 +14,15 @@
     "remove": "rm db.sqlite*"
   },
   "dependencies": {
-    "@types/bun": "^1.0.0",
-    "valibot": "^0.25.0",
+    "@auth/core": "^0.20.0",
+    "immer": "^10.0.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.1",
     "@nuxt/devtools": "^1.0.6",
     "@nuxt/ui": "latest",
+    "@types/bun": "^1.0.0",
     "@vueuse/nuxt": "latest",
     "eslint": "^8.56.0",
     "nuxt": "npm:nuxt-nightly@latest",

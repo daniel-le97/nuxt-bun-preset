@@ -30,7 +30,7 @@ function getAddress() {
   if (
     provider === 'stackblitz'
     || process.env.NITRO_NO_UNIX_SOCKET
-    || process.versions.bun
+    // || process.versions.bun
   )
     return 0
 

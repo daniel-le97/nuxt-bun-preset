@@ -52,7 +52,7 @@ export function getMessagesAndUsers(key: string) {
       subscriptions
     JOIN 
       users ON subscriptions.user = users.id
-    WHERE channel = ?1
+    WHERE subscriptions.channel = ?1
     `).all(key) as User[]
 
   return { messages, users }
@@ -84,7 +84,7 @@ export function insertMessage(channel: string, createdAt: string, message: strin
     if (newMessage.userId !== user)
       throw new Error('user id does not match')
   })
-  const inserted = returnOne({ $1: channel, $2: message, $3: user, $4: createdAt })
+  returnOne({ $1: channel, $2: message, $3: user, $4: createdAt })
   if (!newInsert)
     throw new Error('insert failed')
 
