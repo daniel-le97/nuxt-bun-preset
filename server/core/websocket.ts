@@ -48,24 +48,7 @@ const handlers = new Map<string, (server: BunServer, ws: WS, payload: WebSocketS
     const sent = ws.send('pong')
   })
 
-// function dir() {
-//   if (process.env.NODE_ENV === 'production')
-//     return `${process.cwd()}/.output/server/handlers`
-
-//   return `${process.cwd()}/.nuxt/handlers`
-// }
-// const _handlers = new Bun.FileSystemRouter({
-//   dir: dir(),
-//   style: 'nextjs',
-// })
-
-// for await (const [route, path] of Object.entries(_handlers.routes)) {
-//   if (!route.includes('chunk'))
-//     handlers.set(route.replace('/', ''), (await import(path)).default)
-// }
-
 export const websocket: WebSocketHandler<{ socketId: string, auth: { id?: string, name?: string, image?: string }, channels: string[] }> = {
-  sendPings: true,
   open(ws) {
     // i should probably do something here
   },
@@ -78,8 +61,8 @@ export const websocket: WebSocketHandler<{ socketId: string, auth: { id?: string
       msg.data.createdAt = new Date().toString()
       const hasHandler = handlers.has(msg.type)
 
-      const handler = hasHandler ? handlers.get(msg.type)! : handlers.get('unkown')!
-      return await handler(Server(), ws, msg)
+      const handler = hasHandler ? handlers.get(msg.type) : handlers.get('unkown')!
+      return await handler?.(Server(), ws, msg)
     }
     catch (error) {
       console.error('server:ws:catch-error', error)

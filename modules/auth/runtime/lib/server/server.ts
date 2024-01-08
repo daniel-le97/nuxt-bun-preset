@@ -8,16 +8,16 @@ import type { AuthConfig, Session } from '@auth/core/types'
 import { getToken } from '@auth/core/jwt'
 import { checkOrigin, getAuthJsSecret, getRequestFromEvent, getServerOrigin, makeCookiesFromCookieString } from '../../utils'
 
-if (!globalThis.crypto) {
-  console.log('Polyfilling crypto...')
-  import('node:crypto').then((crypto) => {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: crypto.webcrypto,
-      writable: false,
-      configurable: true,
-    })
-  })
-}
+// if (!globalThis.crypto) {
+//   console.log('Polyfilling crypto...')
+//   import('node:crypto').then((crypto) => {
+//     Object.defineProperty(globalThis, 'crypto', {
+//       value: crypto.webcrypto,
+//       writable: false,
+//       configurable: true,
+//     })
+//   })
+// }
 
 /**
  * This is the event handler for the catch-all route.

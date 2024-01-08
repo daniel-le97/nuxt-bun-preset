@@ -3,7 +3,7 @@
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
 ## notice
-this project tries to use everything bun can provide so bun:sqlite is used and bun hashing for passwords
+this project relies on bun in development and production so it is required
 
 the custom preset can be found in [core](./server/core)
 
@@ -17,6 +17,13 @@ export default defineNitroPlugin(nitroApp => {
     })
 })
 ```
+i am trying to turn this into a module but unsure of how to correctly update types
+
+## Features
+1. custom dev and production preset to customize nuxt and nitro to the fullest
+2. this project showcases a websocket chat with bun websockets
+3. uses local auth via h3 sessions and bun password hashing [auth](./server/api/auth/)
+4. both dev and prod include nitros new Tasks api
 
 ## Setup
 

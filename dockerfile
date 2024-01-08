@@ -37,4 +37,5 @@ COPY --from=prerelease /usr/src/app/.output/ ./.output/
 USER bun
 EXPOSE 3000/tcp
 
+CMD ["sh", "-c", "bun .output/server/index.mjs"]
 ENTRYPOINT [ "bun", "run", "start" ]
