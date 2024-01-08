@@ -10,6 +10,9 @@ dist
 # Node dependencies
 node_modules
 
+.gitignore
+.git
+
 # Logs
 logs
 *.log

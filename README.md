@@ -24,6 +24,7 @@ i am trying to turn this into a module but unsure of how to correctly update typ
 2. this project showcases a websocket chat with bun websockets
 3. uses local auth via h3 sessions and bun password hashing [auth](./server/api/auth/)
 4. both dev and prod include nitros new Tasks api
+5. antfu's eslint config for formatting =)
 
 ## Setup
 
