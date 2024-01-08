@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import type { WebSocketSchema } from '../models/Websocket'
-
-console.log('index.vue')
-
 definePageMeta({
   auth: true,
 })
 useHead({
   title: 'Home Page',
 })
-
-// const { session } = useAuth()
 
 const channel = ref({ id: 1, title: 'General Chat' })
 const { data, refresh } = useFetch<{ messages: MessageSchema[], users: User[] }>(`/api/channels`, {
@@ -38,10 +32,20 @@ type ws<T = any> = ReturnType<typeof useWebSocket<T>>
 const socket = ref<ws>()
 const sendMessage = (message: WebSocketSchema) => socket.value?.send?.(WebSocketSchemaToString(message))
 const interval = ref<ReturnType<typeof setInterval>>()
+const typer = ref<User | null>()
+
+watch(typer, (val) => {
+  if (!val?.name)
+    return
+
+  setTimeout(() => {
+    typer.value = null
+  }, 2000)
+})
 
 onMounted(async () => {
-  const _port = import.meta.dev ? await $fetch('/api/server') as number : 3000
-  const url = `ws://localhost:${_port}`
+  const _port = import.meta.dev ? await $fetch('/api/server') as number : (process.env.PORT || process.env.NITRO_PORT || 3000)
+  const url = `ws://localhost:${Number(_port)}`
   socket.value = useWebSocket(url, {
     onConnected(ws) {
       subscribe()
@@ -51,7 +55,7 @@ onMounted(async () => {
       // }, 5000)
     },
     onMessage(ws, _event) {
-      console.log('client:ws:message', _event.data)
+      // console.log('client:ws:message', _event.data)
       if (!_event.data)
         return
 
@@ -62,7 +66,7 @@ onMounted(async () => {
 
       const event = StringToWebSocketSchema(_event.data as unknown as string)
       if (event.type === 'typing') {
-        console.log('typing', event.data)
+        typer.value = event.data.auth as User
         return
       }
       if (event.type === 'publish') {
@@ -77,8 +81,11 @@ onMounted(async () => {
           name: message.auth!.name!,
         }
         data.value?.messages.push(formatted)
-        if (formatted.userId !== auth.session.value?.id)
-          useToast().add({ title: `${event.type}:${event.data.channel}`, description: event.data.message || '' })
+        if (formatted.userId !== auth.session.value?.id) {
+          const channelId = formatted.channel.split(':')[1]
+          const found = chatRooms.value.find(i => i.id === Number(channelId))
+          useToast().add({ title: `${found?.title}`, description: formatted.message })
+        }
       }
       if (event.type === 'subscribe') {
         const user = event.data.auth as User
@@ -219,9 +226,12 @@ function click() {
         <!-- MESSAGE CONTAINER END -->
 
         <div class="p-2 w-full relative">
+          <div v-if="typer?.name" class=" text-sm">
+            {{ typer?.name }} is typing...
+          </div>
           <textarea v-model="newMessage" type="text" class="w-full rounded-lg p-2" @keyup="handleKeyPress" />
 
-          <button size="xl" class=" mt-2 absolute right-10 top-3.5" type="button" @click="click">
+          <button size="xl" class=" mt-2 absolute right-10 top-4.5" type="button" @click="click">
             Send
           </button>
         </div>

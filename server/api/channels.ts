@@ -1,6 +1,3 @@
-import type { User } from '../../models/User'
-import { getMessagesAndUsers } from '../utils/db'
-
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   if (!query.channel)

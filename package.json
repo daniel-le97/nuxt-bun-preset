@@ -5,13 +5,14 @@
   "scripts": {
     "build": "bun --bun nuxt build",
     "dev": "bun --bun nuxt dev",
+    "start": "bun .output/server/index.mjs",
     "generate": "nuxt generate",
-    "preview": "bun --bun nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "db": "bun ./auth/server/utils/sqlite.ts",
-    "remove": "rm db.sqlite*"
+    "postinstall": "bun --bun nuxt prepare",
+    "lint": "bun --bun eslint .",
+    "lint:fix": "bun --bun eslint . --fix",
+    "kill:port": "PORT=$1 | kill -9 $(lsof -t -i :$PORT)",
+    "reset:db": "rm db.sqlite*",
+    "bench": "bombardier -c 125 -n 100000 http://localhost:3000"
   },
   "dependencies": {
     "@auth/core": "^0.20.0",

@@ -25,7 +25,6 @@ const handlers = new Map<string, (server: BunServer, ws: WS, payload: WebSocketS
     const channel = payload.data.channel!
     const auth = ws.data.auth
     ws.subscribe(channel)
-    ws.data.channels.push(channel)
     addSubscription(channel, auth.id!)
     server.publish(channel, WebSocketSchemaToString({ type: 'subscribe', data: { channel, auth } }))
   })
@@ -34,7 +33,6 @@ const handlers = new Map<string, (server: BunServer, ws: WS, payload: WebSocketS
     const channel = payload.data.channel!
     const auth = ws.data.auth
     ws.unsubscribe(channel)
-    ws.data.channels = ws.data.channels.filter(c => c !== channel)
     removeSubscription(channel, auth.id!)
     server.publish(channel, WebSocketSchemaToString({ type: 'unsubscribe', data: { channel, auth } }))
   })
@@ -69,19 +67,19 @@ const handlers = new Map<string, (server: BunServer, ws: WS, payload: WebSocketS
 export const websocket: WebSocketHandler<{ socketId: string, auth: { id?: string, name?: string, image?: string }, channels: string[] }> = {
   sendPings: true,
   open(ws) {
-    // console.log('server:ws:open', ws.data)
+    // i should probably do something here
   },
   async message(ws, message) {
     try {
       if (message === 'pong')
         return
+
       const msg = StringToWebSocketSchema(String(message))
       msg.data.createdAt = new Date().toString()
       const hasHandler = handlers.has(msg.type)
-      console.log('server:ws:message', msg.type)
 
       const handler = hasHandler ? handlers.get(msg.type)! : handlers.get('unkown')!
-      await handler(Server(), ws, msg)
+      return await handler(Server(), ws, msg)
     }
     catch (error) {
       console.error('server:ws:catch-error', error)
@@ -91,14 +89,19 @@ export const websocket: WebSocketHandler<{ socketId: string, auth: { id?: string
     console.log('server:ws:drain', ws.data)
   },
   close(ws) {
-    if (ws.data?.auth?.id) {
-      console.log('server:ws:close', ws.data.auth.id)
-      ws.data.channels.forEach((channel) => {
-        Server().publish(channel, WebSocketSchemaToString({ type: 'unsubscribe', data: { channel, auth: ws.data.auth } }))
-        ws.unsubscribe(channel)
-        removeSubscription(channel, ws.data.auth.id!)
+    try {
+      if (!ws.data?.auth?.id)
+        return
+
+      const subscriptions = getSubscriptionsByUserId(ws.data.auth.id)
+      subscriptions.forEach((sub) => {
+        Server().publish(sub.channel, WebSocketSchemaToString({ type: 'unsubscribe', data: { channel: sub.channel, auth: ws.data.auth } }))
+        ws.unsubscribe(sub.channel)
+        removeSubscription(sub.channel, ws.data.auth.id!)
       })
-      ws.unsubscribe(ws.data?.auth?.id)
+    }
+    catch (error) {
+      console.error('server:ws:close', error)
     }
   },
 }

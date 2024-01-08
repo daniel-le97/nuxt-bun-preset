@@ -1,4 +1,4 @@
-import { Glob } from 'bun'
+import { Glob } from 'node:bun'
 import type { Nitro } from 'nitropack'
 
 export async function builder(nitro: Nitro) {
