@@ -15,8 +15,6 @@
     "bench": "bombardier -c 125 -n 100000 http://localhost:3000"
   },
   "dependencies": {
-    "@auth/core": "^0.20.0",
-    "immer": "^10.0.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
